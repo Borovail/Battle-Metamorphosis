@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float _groundCheckRadius;
     [SerializeField] private Transform _feet;
     [SerializeField] private LayerMask _groundLayers;
+    [SerializeField] private Gun _gun;
 
     private Rigidbody2D _rigidbody;
     private InputSystem_Actions _userInput;
@@ -21,6 +22,7 @@ public class Player : MonoBehaviour
     {
         _userInput.Player.Enable();
         _userInput.Player.Jump.performed += OnJump;
+        _userInput.Player.Attack.performed += OnAttack;
     }
 
     private void FixedUpdate()
@@ -31,6 +33,7 @@ public class Player : MonoBehaviour
     private void OnDisable()
     {
         _userInput.Player.Jump.performed -= OnJump;
+        _userInput.Player.Attack.performed -= OnAttack;
         _userInput.Player.Disable();
     }
 
@@ -46,6 +49,9 @@ public class Player : MonoBehaviour
         if (!grounded) return;
         _rigidbody.velocityY = _jumpForce;
     }
-    private void Move(Vector2 direction) => _rigidbody.velocityX = direction.x * _speed;
-    
+    private void OnAttack(UnityEngine.InputSystem.InputAction.CallbackContext obj) => _gun.Shoot();
+    private void Move(Vector2 direction) => _rigidbody.velocity = new Vector2(direction.x * _speed, _rigidbody.velocity.y);
+
+
+
 }
