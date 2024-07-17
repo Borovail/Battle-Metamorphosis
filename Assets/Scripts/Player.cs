@@ -1,7 +1,8 @@
+using Assets.Scripts;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IAttackable
 {
     [SerializeField] private float _speed;
     [SerializeField] private float _jumpForce;
@@ -54,5 +55,8 @@ public class Player : MonoBehaviour
     private void Move(Vector2 direction) => _rigidbody.velocity = new Vector2(direction.x * _speed, _rigidbody.velocity.y);
 
 
-
+    public void TakeDamage(AttackInfo attackInfo)
+    {
+        Debug.Log($"Getting attack with {attackInfo}");
+    }
 }
