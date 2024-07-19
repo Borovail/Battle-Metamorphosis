@@ -4,9 +4,11 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class Player : MonoBehaviour, IAttackable
 {
-    [SerializeField] private float _speed;
-    [SerializeField] private float _jumpForce;
-    [SerializeField] private float _groundCheckRadius;
+    [SerializeField] private float _speed=5f;
+    [SerializeField] private float _jumpForce =7f;
+    [SerializeField] private float _groundCheckRadius =.1f;
+    [SerializeField] private int _health=100;
+
     [SerializeField] private Transform _feet;
     [SerializeField] private LayerMask _groundLayers;
     [SerializeField] private Gun _gun;
@@ -51,12 +53,32 @@ public class Player : MonoBehaviour, IAttackable
         if (!grounded) return;
         _rigidbody.velocityY = _jumpForce;
     }
-    private void OnAttack(UnityEngine.InputSystem.InputAction.CallbackContext obj) => /*_gun.Shoot();*/ _sword.Swing();
-    private void Move(Vector2 direction) => _rigidbody.velocity = new Vector2(direction.x * _speed, _rigidbody.velocity.y);
+    private void OnAttack(UnityEngine.InputSystem.InputAction.CallbackContext obj) => _gun.Shoot(); /*_sword.Swing();*/
+    private void Move(Vector2 direction) => transform.position += (Vector3)direction * _speed * Time.deltaTime;
 
-
-    public void TakeDamage(AttackInfo attackInfo)
+    void IAttackable.ApplyDamage(AttackInfo attackInfo)
     {
-        Debug.Log($"Getting attack with {attackInfo}");
+        if (_health - attackInfo.Damage <= 0)
+            Destroy(gameObject);
+
+        _speed += 0.3f;
+        _jumpForce += 0.3f;
+        _health -= attackInfo.Damage;
+    }
+
+    void IAttackable.ApplyKnockback(AttackInfo attackInfo)
+    {
+        var knockbackDirection = ((Vector2)transform.position - attackInfo.AttackPosition).normalized;
+
+        var hit = Physics2D.Raycast((Vector2)transform.position + knockbackDirection, knockbackDirection, attackInfo.PushForce);
+        Debug.Log($"Hit: {hit.collider}");
+
+        Debug.DrawRay((Vector2)transform.position + knockbackDirection, knockbackDirection, Color.black,1f);
+
+        var newKnockbackDistance = hit.collider != null ? hit.distance : attackInfo.PushForce;
+        var knockbackForce = knockbackDirection * newKnockbackDistance;
+
+        Debug.Log($"knockbackForce: {knockbackForce} , newKnockbackDistance: {newKnockbackDistance} , knockbackDirection: {knockbackDirection} ");
+        _rigidbody.AddForce(knockbackForce, ForceMode2D.Impulse);
     }
 }

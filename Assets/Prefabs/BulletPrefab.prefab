@@ -101,6 +101,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e195c0030e7525409d3994747bc4aba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _attackInfo:
+    Damage: 15
+    PushForce: 5
+    AttackPosition: {x: 0, y: 0}
   _speed: 10
   _raycastDistance: 0.2
   _interactionLayers:
