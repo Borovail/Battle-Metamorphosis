@@ -1,3 +1,4 @@
+using System;
 using Assets.Scripts;
 using UnityEngine;
 
@@ -10,6 +11,12 @@ public class Bullet : MonoBehaviour
     [SerializeField] private LayerMask _interactionLayers;
 
     private Rigidbody2D _ridigbody;
+    private Vector2 _direction;
+
+    public void SetDirection(Vector2 direction)
+    {
+        _direction = direction;
+    }
 
     private void Awake()
     {
@@ -31,6 +38,6 @@ public class Bullet : MonoBehaviour
             Destroy(gameObject);
         }
 
-        _ridigbody.velocity = transform.right * _speed;
+        _ridigbody.velocity = _direction * _speed;
     }
 }

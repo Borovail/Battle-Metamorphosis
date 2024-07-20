@@ -9,7 +9,7 @@ public class Gun : MonoBehaviour
 
     private bool _canShoot = true;
 
-    public void Shoot()
+    public void Shoot(Vector2 direction)
     {
         if (!_canShoot)
         {
@@ -17,10 +17,11 @@ public class Gun : MonoBehaviour
             return;
         }
 
-        Instantiate(_bulletPrefab, _bulletSpawnPoint);
+        var bullet = Instantiate(_bulletPrefab, _bulletSpawnPoint.position, _bulletSpawnPoint.rotation);
+        bullet.SetDirection(direction);
+        bullet.transform.SetParent(null);
         Debug.Log("Shoot");
         StartCoroutine(ShootCoroutine());
-
     }
 
     private IEnumerator ShootCoroutine()

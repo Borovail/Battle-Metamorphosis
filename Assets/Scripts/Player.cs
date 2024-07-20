@@ -1,3 +1,4 @@
+using System;
 using Assets.Scripts;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ public class Player : MonoBehaviour, IAttackable
 {
     [SerializeField] private float _speed=5f;
     [SerializeField] private float _jumpForce =7f;
-    [SerializeField] private float _groundCheckRadius =.1f;
+    [SerializeField] private Vector2 _groundCheckSize;
     [SerializeField] private int _health=100;
 
     [SerializeField] private Transform _feet;
@@ -27,6 +28,7 @@ public class Player : MonoBehaviour, IAttackable
         _userInput.Player.Enable();
         _userInput.Player.Jump.performed += OnJump;
         _userInput.Player.Attack.performed += OnAttack;
+        _userInput.Player.Shoot.performed += OnShoot;
     }
 
     private void FixedUpdate()
@@ -38,23 +40,37 @@ public class Player : MonoBehaviour, IAttackable
     {
         _userInput.Player.Jump.performed -= OnJump;
         _userInput.Player.Attack.performed -= OnAttack;
+        _userInput.Player.Shoot.performed -= OnShoot;
         _userInput.Player.Disable();
     }
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(_feet.position, _groundCheckRadius);
+        Gizmos.DrawWireCube(_feet.position, _groundCheckSize);
     }
 
     private void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
-        var grounded = Physics2D.OverlapCircle(_feet.position, _groundCheckRadius, _groundLayers);
+        var grounded = Physics2D.OverlapBox(_feet.position, _groundCheckSize, _groundLayers);
         if (!grounded) return;
         _rigidbody.velocityY = _jumpForce;
     }
-    private void OnAttack(UnityEngine.InputSystem.InputAction.CallbackContext obj) => _gun.Shoot(); /*_sword.Swing();*/
-    private void Move(Vector2 direction) => transform.position += (Vector3)direction * _speed * Time.deltaTime;
+
+    private void OnShoot(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        var direction = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
+        _gun.Shoot(direction);
+    }
+    private void OnAttack(UnityEngine.InputSystem.InputAction.CallbackContext obj) => _sword.Swing();
+    private void Move(Vector2 direction)
+    {
+        if(direction == Vector2.zero) return;
+
+        var localScaleX = direction.x > 0 ? Math.Abs(transform.localScale.x) : -Math.Abs(transform.localScale.x);
+        transform.localScale = new Vector3(localScaleX, transform.localScale.y);
+        transform.position += (Vector3)direction * _speed * Time.deltaTime;
+    }
 
     void IAttackable.ApplyDamage(AttackInfo attackInfo)
     {
